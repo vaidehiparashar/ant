@@ -16,16 +16,16 @@ export default function Login() {
   const handleRoleRedirect = (role) => {
     switch (role) {
       case 'admin':
-        navigate('/admin');
+        navigate('/admin/dashboard');
         break;
       case 'hr':
-        navigate('/hr');
+        navigate('/hr/dashboard');
         break;
       case 'employee':
-        navigate('/employee');
+        navigate('/employee/dashboard');
         break;
       case 'intern':
-        navigate('/intern');
+        navigate('/intern/dashboard');
         break;
       default:
         setError('Invalid role assigned');
