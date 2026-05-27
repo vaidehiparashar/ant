@@ -54,7 +54,7 @@ const generateMockLogs = () => {
     const action = ACTIONS[Math.floor(Math.random() * ACTIONS.length)];
     const moduleName = MODULES[Math.floor(Math.random() * MODULES.length)];
     const user = MOCK_USERS[Math.floor(Math.random() * MOCK_USERS.length)];
-    const date = subDays(now, Math.floor(Math.random() * 30));
+    const date = subDays(now, Math.floor(Math.random() * 365));
     date.setHours(Math.floor(Math.random() * 24), Math.floor(Math.random() * 60));
 
     let desc = `Performed ${action} in ${moduleName} module`;
