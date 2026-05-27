@@ -69,6 +69,8 @@ export default function MyLeaves() {
   const { myLeaves, balance, loading, error, fetchMyLeaves, fetchBalance, applyLeave, rejectLeave } = useLeaveStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const [showMailNotification, setShowMailNotification] = useState(false);
+
   useEffect(() => {
     if (user?.uid) {
       fetchMyLeaves();
@@ -79,6 +81,8 @@ export default function MyLeaves() {
   const handleApply = async (data) => {
     await applyLeave({ ...data, uid: user.uid, status: 'pending', appliedOn: new Date().toISOString() });
     setIsModalOpen(false);
+    setShowMailNotification(true);
+    setTimeout(() => setShowMailNotification(false), 5000);
   };
 
   const handleCancel = async (id) => {
@@ -190,6 +194,25 @@ export default function MyLeaves() {
 
       <AnimatePresence>
         {isModalOpen && <LeaveModal onClose={() => setIsModalOpen(false)} onSave={handleApply} />}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showMailNotification && (
+          <motion.div 
+            initial={{ opacity: 0, y: 50, x: 50 }} 
+            animate={{ opacity: 1, y: 0, x: 0 }} 
+            exit={{ opacity: 0, y: 50, x: 50 }}
+            className="fixed bottom-6 right-6 bg-[#111118] border border-[#1E1E2E] rounded-xl shadow-2xl p-4 flex items-start gap-4 z-50 w-80"
+          >
+            <div className="bg-purple-500/20 p-2 rounded-lg text-purple-400 mt-1">
+              <svg xmlns="http://www.w3.org/200.svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            </div>
+            <div>
+              <h4 className="text-white font-medium text-sm">Mail Received: HR Dept</h4>
+              <p className="text-gray-400 text-xs mt-1">Your leave request has been successfully delivered and is awaiting manager approval.</p>
+            </div>
+          </motion.div>
+        )}
       </AnimatePresence>
     </div>
   );
