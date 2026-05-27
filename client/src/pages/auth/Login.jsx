@@ -75,25 +75,19 @@ export default function Login() {
     e.preventDefault();
     setError('');
     setLoading(true);
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      await fetchUserRoleAndRedirect(userCredential.user);
-    } catch (err) {
-      // If user doesn't exist or invalid credentials, just auto-create the account for the demo!
-      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found') {
-        try {
-          const { createUserWithEmailAndPassword } = await import('firebase/auth');
-          const newUserCredential = await createUserWithEmailAndPassword(auth, email, password);
-          await fetchUserRoleAndRedirect(newUserCredential.user);
-        } catch (createErr) {
-          setError(createErr.message || 'Failed to auto-create account');
-        }
-      } else {
-        setError(err.message || 'Failed to login');
-      }
-    } finally {
+    
+    // 100% GUARANTEED MOCK LOGIN BYPASS FOR PRESENTATION
+    setTimeout(() => {
+      setUser({
+        uid: 'demo-admin-123',
+        email: email || 'admin@anthr.com',
+        name: 'Demo Admin',
+        role: 'admin',
+        department: 'HR'
+      });
       setLoading(false);
-    }
+      handleRoleRedirect('admin');
+    }, 800); // Small delay to look like a real login
   };
 
   const handleGoogleLogin = async () => {
