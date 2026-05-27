@@ -49,8 +49,8 @@ const generateMockLogs = () => {
   const logs = [];
   const now = new Date();
   
-  // Generate 200 random logs over last 30 days
-  for (let i = 0; i < 200; i++) {
+  // Generate 2000 random logs over last 30 days
+  for (let i = 0; i < 2000; i++) {
     const action = ACTIONS[Math.floor(Math.random() * ACTIONS.length)];
     const moduleName = MODULES[Math.floor(Math.random() * MODULES.length)];
     const user = MOCK_USERS[Math.floor(Math.random() * MOCK_USERS.length)];
@@ -158,15 +158,23 @@ export default function AuditLog() {
 
   // Filter Logic
   const filteredLogs = useMemo(() => {
+    // Fix reversed date ranges automatically for the user
+    let actualDateFrom = dateFrom;
+    let actualDateTo = dateTo;
+    if (dateFrom && dateTo && new Date(dateFrom) > new Date(dateTo)) {
+      actualDateFrom = dateTo;
+      actualDateTo = dateFrom;
+    }
+
     return logs.filter(l => {
       const matchAction = actionFilter === 'all' || l.action === actionFilter;
       const matchModule = moduleFilter === 'all' || l.module === moduleFilter;
       const matchUser = userFilter === 'all' || l.user.name === userFilter;
       
       let matchDate = true;
-      if (dateFrom) matchDate = matchDate && isAfter(parseISO(l.timestamp), new Date(dateFrom));
-      if (dateTo) {
-        const toEnd = new Date(dateTo);
+      if (actualDateFrom) matchDate = matchDate && isAfter(parseISO(l.timestamp), new Date(actualDateFrom));
+      if (actualDateTo) {
+        const toEnd = new Date(actualDateTo);
         toEnd.setHours(23, 59, 59);
         matchDate = matchDate && isBefore(parseISO(l.timestamp), toEnd);
       }
