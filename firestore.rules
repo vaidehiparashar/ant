@@ -1,0 +1,121 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return request.auth.token.role == 'admin';
+    }
+    
+    function isHR() {
+      return request.auth.token.role == 'hr' || isAdmin();
+    }
+    
+    function isOwner(uid) {
+      return request.auth.uid == uid;
+    }
+    
+    function isEmployee() {
+      return request.auth.token.role == 'employee';
+    }
+    
+    function isIntern() {
+      return request.auth.token.role == 'intern';
+    }
+    
+    function isHROrAdmin() {
+      return isHR() || isAdmin();
+    }
+    
+    function isAnyRole() {
+      return isAuthenticated() && request.auth.token.role in ['admin', 'hr', 'employee', 'intern'];
+    }
+
+    function onlyUpdating(fields) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields);
+    }
+    
+    // Users collection
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isHROrAdmin();
+      allow create: if isAdmin();
+      allow update: if isAdmin() || (isOwner(uid) && onlyUpdating(['phone', 'avatarUrl']));
+      allow delete: if false;
+    }
+
+    // Attendance
+    match /attendance/{recordId} {
+      allow read: if isHROrAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update: if isHROrAdmin() || (isOwner(resource.data.userId) && onlyUpdating(['checkOut', 'hoursWorked', 'status']));
+      allow delete: if isAdmin();
+    }
+
+    // Leaves
+    match /leaves/{leaveId} {
+      allow read: if isHROrAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update: if isHROrAdmin() || (isOwner(resource.data.userId) && resource.data.status == 'pending' && onlyUpdating(['status']));
+      allow delete: if isAdmin();
+    }
+
+    // Payroll
+    match /payroll/{payrollId} {
+      allow read: if isHROrAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow create: if isHROrAdmin();
+      allow update: if isHROrAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Performance
+    match /performance/{recordId} {
+      allow read: if isHROrAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow create: if isHROrAdmin();
+      allow update: if isHROrAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Interns
+    match /interns/{internId} {
+      allow read: if isHROrAdmin() || (isIntern() && resource.data.email == request.auth.token.email);
+      allow create: if isHROrAdmin();
+      allow update: if isHROrAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Recognitions
+    match /recognitions/{recId} {
+      allow read: if isHROrAdmin() || (isAuthenticated() && (resource.data.toUserId == request.auth.uid || resource.data.fromUserId == request.auth.uid));
+      allow create: if isAnyRole() && request.resource.data.fromUserId == request.auth.uid;
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+
+    // Email Logs
+    match /emailLogs/{logId} {
+      allow read: if isHROrAdmin();
+      allow create: if isHROrAdmin();
+      allow update: if isHROrAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Org Health
+    match /orgHealth/{monthKey} {
+      allow read: if isHROrAdmin();
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // System Logs
+    match /systemLogs/{logId} {
+      allow read: if isAdmin();
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+}

@@ -1,0 +1,10 @@
+node_modules/
+client/dist/
+.env
+.env.local
+.env.production
+functions/.env
+functions/.env.production
+functions/node_modules/
+*.log
+.DS_Store

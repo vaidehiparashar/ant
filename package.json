@@ -1,0 +1,14 @@
+{
+  "name": "anthr-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "cd client && npm run dev",
+    "build": "cd client && npm run build",
+    "deploy:hosting": "npm run build && firebase deploy --only hosting",
+    "deploy:functions": "cd functions && npm run build && firebase deploy --only functions",
+    "deploy:rules": "firebase deploy --only firestore,storage",
+    "deploy:all": "npm run build && firebase deploy",
+    "emulate": "firebase emulators:start"
+  }
+}
