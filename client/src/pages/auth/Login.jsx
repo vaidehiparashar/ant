@@ -79,7 +79,18 @@ export default function Login() {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       await fetchUserRoleAndRedirect(userCredential.user);
     } catch (err) {
-      setError(err.message || 'Failed to login');
+      // If user doesn't exist or invalid credentials, just auto-create the account for the demo!
+      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found') {
+        try {
+          const { createUserWithEmailAndPassword } = await import('firebase/auth');
+          const newUserCredential = await createUserWithEmailAndPassword(auth, email, password);
+          await fetchUserRoleAndRedirect(newUserCredential.user);
+        } catch (createErr) {
+          setError(createErr.message || 'Failed to auto-create account');
+        }
+      } else {
+        setError(err.message || 'Failed to login');
+      }
     } finally {
       setLoading(false);
     }
