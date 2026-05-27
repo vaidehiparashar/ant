@@ -48,7 +48,7 @@ router.post('/compose-email', verifyToken, checkRole('admin', 'hr'), async (req,
       instructions += `\nAdditional Context to include: ${context}`;
     }
 
-    instructions += `\n\nOutput ONLY a valid JSON object with strictly two keys: "subject" and "body". Do not include markdown formatting like ```json. The body should use \\n for new lines.`;
+    instructions += `\n\nOutput ONLY a valid JSON object with strictly two keys: "subject" and "body". Do not include markdown formatting like \`\`\`json. The body should use \\n for new lines.`;
 
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
@@ -186,7 +186,7 @@ router.post('/nl-search', verifyToken, checkRole('admin', 'hr'), async (req, res
       
       Return ONLY a JSON array containing the exact employee objects from the Dataset that match the query.
       If none match, return an empty array [].
-      Do not include markdown blocks like ```json. Return pure JSON.
+      Do not include markdown blocks like \`\`\`json. Return pure JSON.
     `;
 
     const response = await anthropic.messages.create({

@@ -99,7 +99,7 @@ router.put('/:internId/stage', verifyToken, checkRole('admin', 'hr'), async (req
       promptContent += "Keep it professional and informative.";
     }
 
-    promptContent += `\n\nOutput ONLY a valid JSON object with strictly two keys: "subject" and "body". Do not include markdown formatting like ```json. The body should use \\n for new lines.`;
+    promptContent += `\n\nOutput ONLY a valid JSON object with strictly two keys: "subject" and "body". Do not include markdown formatting like \`\`\`json. The body should use \\n for new lines.`;
 
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
