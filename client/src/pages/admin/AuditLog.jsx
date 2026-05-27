@@ -11,30 +11,6 @@ import {
 } from 'recharts';
 import { format, parseISO, subDays, isSameDay, isAfter, isBefore } from 'date-fns';
 
-// --- HELPER HOOK FOR COUNT UP ---
-function CountUp({ end, durationMs = 1500 }) {
-  const [count, setCount] = useState(0);
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true });
-
-  useEffect(() => {
-    if (isInView) {
-      let start = 0;
-      const increment = end / (durationMs / 16); 
-      const timer = setInterval(() => {
-        start += increment;
-        if (start >= end) {
-          clearInterval(timer);
-          setCount(end);
-        } else setCount(start);
-      }, 16);
-      return () => clearInterval(timer);
-    }
-  }, [end, isInView, durationMs]);
-
-  return <span ref={ref}>{count.toFixed(0)}</span>;
-}
-
 // --- MOCK DATA GENERATION ---
 const MOCK_USERS = [
   { name: 'Admin Supremo', role: 'admin', avatar: 'https://i.pravatar.cc/150?u=a1' },
@@ -49,7 +25,21 @@ const generateMockLogs = () => {
   const logs = [];
   const now = new Date();
   
-  // Generate 2000 random logs over last 30 days
+  // Guarantee 20 logs for TODAY
+  for (let i = 0; i < 20; i++) {
+    logs.push({
+      id: `log_today_${i}`,
+      timestamp: now.toISOString(),
+      user: MOCK_USERS[0],
+      action: ACTIONS[i % ACTIONS.length],
+      module: MODULES[i % MODULES.length],
+      description: `Guaranteed action for today`,
+      ip: `192.168.1.1`,
+      payload: null
+    });
+  }
+
+  // Generate 2000 random logs over last 365 days
   for (let i = 0; i < 2000; i++) {
     const action = ACTIONS[Math.floor(Math.random() * ACTIONS.length)];
     const moduleName = MODULES[Math.floor(Math.random() * MODULES.length)];
@@ -188,8 +178,8 @@ export default function AuditLog() {
   };
 
   const handleExport = () => {
-    const csv = "Timestamp,User,Action,Module,Description,IP\\n" + 
-      filteredLogs.map(l => `${l.timestamp},${l.user.name},${l.action},${l.module},${l.description},${l.ip}`).join("\\n");
+    const csv = "Timestamp,User,Action,Module,Description,IP\n" + 
+      filteredLogs.map(l => `${l.timestamp},${l.user.name},${l.action},${l.module},${l.description},${l.ip}`).join("\n");
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -230,19 +220,19 @@ export default function AuditLog() {
       {/* STATS ROW */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div className="bg-[#111118] border border-[#1E1E2E] rounded-xl p-5 shadow-lg flex items-center justify-between">
-          <div><p className="text-xs text-gray-400 uppercase font-bold mb-1">Actions Today</p><p className="text-3xl font-serif text-white"><CountUp end={stats.todayActions} /></p></div>
+          <div><p className="text-xs text-gray-400 uppercase font-bold mb-1">Actions Today</p><p className="text-3xl font-serif text-white">{stats.todayActions}</p></div>
           <Activity size={24} className="text-[#6366F1] opacity-50" />
         </div>
         <div className="bg-[#111118] border border-[#1E1E2E] rounded-xl p-5 shadow-lg flex items-center justify-between">
-          <div><p className="text-xs text-gray-400 uppercase font-bold mb-1">AI Calls (Month)</p><p className="text-3xl font-serif text-white"><CountUp end={stats.aiCalls} /></p></div>
+          <div><p className="text-xs text-gray-400 uppercase font-bold mb-1">AI Calls (Month)</p><p className="text-3xl font-serif text-white">{stats.aiCalls}</p></div>
           <Cpu size={24} className="text-purple-500 opacity-50" />
         </div>
         <div className="bg-[#111118] border border-[#1E1E2E] rounded-xl p-5 shadow-lg flex items-center justify-between">
-          <div><p className="text-xs text-gray-400 uppercase font-bold mb-1">Failed Logins</p><p className="text-3xl font-serif text-[#EF4444]"><CountUp end={stats.failedLogins} /></p></div>
+          <div><p className="text-xs text-gray-400 uppercase font-bold mb-1">Failed Logins</p><p className="text-3xl font-serif text-[#EF4444]">{stats.failedLogins}</p></div>
           <UserX size={24} className="text-[#EF4444] opacity-50" />
         </div>
         <div className="bg-[#111118] border border-[#1E1E2E] rounded-xl p-5 shadow-lg flex items-center justify-between">
-          <div><p className="text-xs text-gray-400 uppercase font-bold mb-1">Data Exports</p><p className="text-3xl font-serif text-white"><CountUp end={stats.exports} /></p></div>
+          <div><p className="text-xs text-gray-400 uppercase font-bold mb-1">Data Exports</p><p className="text-3xl font-serif text-white">{stats.exports}</p></div>
           <Database size={24} className="text-[#F59E0B] opacity-50" />
         </div>
       </div>
